@@ -456,7 +456,7 @@ function applyWatermarkSetting(setting) {
     saveWatermarksToLocalStorage();
 }
 
-document.getElementById('saveImage').addEventListener('click', () => {
+function saveImage() {
     if (!currentImage) return;
 
     const library = document.getElementById('imageLibrary');
@@ -479,16 +479,7 @@ document.getElementById('saveImage').addEventListener('click', () => {
 
     container.addEventListener('click', () => openModal(originalImage.src, watermarkedImage.src));
     saveImageLibraryToLocalStorage();
-});
-
-document.getElementById('downloadImage').addEventListener('click', () => {
-    if (!currentImage) return;
-
-    const link = document.createElement('a');
-    link.download = 'watermarked-image.png';
-    link.href = canvas.toDataURL();
-    link.click();
-});
+}
 
 function openModal(originalSrc, watermarkedSrc) {
     const modal = document.getElementById('imageModal');
@@ -511,6 +502,42 @@ function closeModal() {
     modal.classList.remove('flex');
     modal.classList.add('hidden');
 }
+
+function saveWatermarksToLocalStorage() {
+    localStorage.setItem('watermarks', JSON.stringify(watermarks));
+}
+
+function saveSettingsToLocalStorage() {
+    localStorage.setItem('savedSettings', JSON.stringify(savedSettings));
+}
+
+function saveImageLibraryToLocalStorage() {
+    const library = document.getElementById('imageLibrary').innerHTML;
+    localStorage.setItem('imageLibrary', library);
+}
+
+function loadImageLibraryFromLocalStorage() {
+    const library = localStorage.getItem('imageLibrary');
+    if (library) {
+        document.getElementById('imageLibrary').innerHTML = library;
+        document.querySelectorAll('#imageLibrary > div').forEach(container => {
+            const originalImage = container.querySelector('img:first-child');
+            const watermarkedImage = container.querySelector('img:last-child');
+            container.addEventListener('click', () => openModal(originalImage.src, watermarkedImage.src));
+        });
+    }
+}
+
+document.getElementById('saveImage').addEventListener('click', saveImage);
+
+document.getElementById('downloadImage').addEventListener('click', () => {
+    if (!currentImage) return;
+
+    const link = document.createElement('a');
+    link.download = 'watermarked-image.png';
+    link.href = canvas.toDataURL();
+    link.click();
+});
 
 document.getElementById('closeModal').addEventListener('click', closeModal);
 
@@ -542,31 +569,6 @@ document.getElementById('imageModal').addEventListener('click', (e) => {
         closeModal();
     }
 });
-
-function saveWatermarksToLocalStorage() {
-    localStorage.setItem('watermarks', JSON.stringify(watermarks));
-}
-
-function saveSettingsToLocalStorage() {
-    localStorage.setItem('savedSettings', JSON.stringify(savedSettings));
-}
-
-function saveImageLibraryToLocalStorage() {
-    const library = document.getElementById('imageLibrary').innerHTML;
-    localStorage.setItem('imageLibrary', library);
-}
-
-function loadImageLibraryFromLocalStorage() {
-    const library = localStorage.getItem('imageLibrary');
-    if (library) {
-        document.getElementById('imageLibrary').innerHTML = library;
-        document.querySelectorAll('#imageLibrary > div').forEach(container => {
-            const originalImage = container.querySelector('img:first-child');
-            const watermarkedImage = container.querySelector('img:last-child');
-            container.addEventListener('click', () => openModal(originalImage.src, watermarkedImage.src));
-        });
-    }
-}
 
 function init() {
     updateSavedSettingsBox();

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Watermark Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        .scrollable-settings {
+            max-height: calc(100vh - 300px);
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <h1 class="text-4xl font-bold mb-6 text-center text-blue-600">Comprehensive Watermark Pro</h1>
+        
+        <div class="flex flex-wrap -mx-2">
+            <div class="w-full md:w-1/3 px-2 mb-4">
+                <!-- Image upload -->
+                <div class="bg-white p-4 rounded-lg shadow-md mb-4">
+                    <h2 class="text-xl font-semibold mb-4">Upload Image</h2>
+                    <input type="file" id="imageUpload" accept="image/*" class="hidden">
+                    <label for="imageUpload" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded cursor-pointer transition duration-300 ease-in-out flex items-center justify-center">
+                        <i class="fas fa-upload mr-2"></i> Choose Image
+                    </label>
+                </div>
+
+                <!-- Watermark controls -->
+                <div class="bg-white p-4 rounded-lg shadow-md mb-4 scrollable-settings">
+                    <h2 class="text-xl font-semibold mb-4">Watermark Options</h2>
+                    <div id="watermarkControls">
+                        <!-- Watermark controls will be dynamically added here -->
+                    </div>
+                    <button id="addWatermark" class="mt-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition duration-300 ease-in-out">
+                        <i class="fas fa-plus mr-2"></i> Add Watermark
+                    </button>
+                </div>
+            </div>
+            
+            <div class="w-full md:w-2/3 px-2 mb-4">
+                <!-- Image editor -->
+                <div class="bg-white p-4 rounded-lg shadow-md mb-4">
+                    <h2 class="text-xl font-semibold mb-4">Image Preview</h2>
+                    <canvas id="canvas" class="border border-gray-300 w-full"></canvas>
+                </div>
+                
+                <!-- Saved Settings Box -->
+                <div id="savedSettingsBox" class="bg-white p-4 rounded-lg shadow-md">
+                    <!-- Saved settings will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Save and download buttons -->
+        <div class="flex justify-center space-x-4 mb-6">
+            <button id="saveImage" class="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-2 rounded transition duration-300 ease-in-out">
+                <i class="fas fa-save mr-2"></i> Save to Library
+            </button>
+            <button id="downloadImage" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded transition duration-300 ease-in-out">
+                <i class="fas fa-download mr-2"></i> Download Image
+            </button>
+        </div>
+        
+        <!-- Image library -->
+        <div class="bg-white p-4 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Image Library</h2>
+            <div id="imageLibrary" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+        <div class="bg-white p-4 rounded-lg max-w-2xl w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold">Enlarged Image</h3>
+                <button id="closeModal" class="text-2xl">&times;</button>
+            </div>
+            <img id="modalImage" src="" alt="Enlarged image" class="w-full mb-4">
+            <div class="flex justify-between">
+                <button id="toggleImage" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                    Toggle Original/Watermarked
+                </button>
+                <button id="downloadModalImage" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+                    <i class="fas fa-download mr-2"></i> Download Image
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

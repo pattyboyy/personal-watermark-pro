@@ -6,12 +6,6 @@
     <title>Comprehensive Watermark Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
-    <style>
-        .scrollable-settings {
-            max-height: calc(100vh - 300px);
-            overflow-y: auto;
-        }
-    </style>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-gray-100">
@@ -50,6 +44,7 @@
                 
                 <!-- Saved Settings Box -->
                 <div id="savedSettingsBox" class="bg-white p-4 rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold mb-2">Saved Watermark Settings</h3>
                     <!-- Saved settings will be dynamically added here -->
                 </div>
             </div>
@@ -74,13 +69,13 @@
 
     <!-- Modal -->
     <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
-        <div id="imageModalContent">
+        <div class="bg-white p-6 rounded-lg max-w-3xl w-full">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-semibold">Enlarged Image</h3>
                 <button id="closeModal" class="text-2xl">&times;</button>
             </div>
-            <img id="modalImage" src="" alt="Enlarged image">
-            <div class="modal-buttons">
+            <img id="modalImage" src="" alt="Enlarged image" class="w-full h-auto mb-4">
+            <div class="flex justify-between">
                 <button id="toggleImage" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
                     Toggle Original/Watermarked
                 </button>

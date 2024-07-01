@@ -1,3 +1,5 @@
+/* styles.css */
+
 /* Custom styles can be added here */
 .custom-range {
     -webkit-appearance: none;
@@ -41,6 +43,10 @@
     justify-content: center;
     align-items: center;
     padding: 20px;
+}
+
+#imageModal.flex {
+    display: flex !important;
 }
 
 #imageModalContent {

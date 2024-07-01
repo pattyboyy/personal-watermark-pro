@@ -5,10 +5,19 @@ let watermarks = JSON.parse(localStorage.getItem('watermarks')) || [];
 let savedSettings = JSON.parse(localStorage.getItem('savedSettings')) || [];
 
 function updatePreview() {
-    if (!currentImage) return;
+    if (!currentImage) {
+        console.warn('No image loaded, skipping preview update');
+        return;
+    }
 
+    console.log('Updating preview');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
+
+    if (watermarks.length === 0) {
+        console.warn('No watermarks defined, skipping watermark application');
+        return;
+    }
 
     watermarks.forEach(watermark => {
         applyWatermarkFromSettings(watermark);
@@ -16,37 +25,64 @@ function updatePreview() {
 }
 
 function applyWatermarkFromSettings(watermark) {
-    const text = document.getElementById(`watermarkText_${watermark.id}`).value;
-    const font = document.getElementById(`watermarkFont_${watermark.id}`).value;
-    const color = document.getElementById(`watermarkColor_${watermark.id}`).value;
-    const opacity = parseFloat(document.getElementById(`watermarkOpacity_${watermark.id}`).value);
-    const size = parseInt(document.getElementById(`watermarkSize_${watermark.id}`).value);
-    const position = document.getElementById(`watermarkPosition_${watermark.id}`).value;
-    const rotation = parseInt(document.getElementById(`watermarkRotation_${watermark.id}`).value);
-    const effect = document.getElementById(`watermarkEffect_${watermark.id}`).value;
-    const enablePattern = document.getElementById(`enablePattern_${watermark.id}`).checked;
-    const patternSpacing = parseInt(document.getElementById(`patternSpacing_${watermark.id}`).value);
-    const patternAngle = parseInt(document.getElementById(`patternAngle_${watermark.id}`).value);
+    const elements = {
+        text: document.getElementById(`watermarkText_${watermark.id}`),
+        font: document.getElementById(`watermarkFont_${watermark.id}`),
+        color: document.getElementById(`watermarkColor_${watermark.id}`),
+        opacity: document.getElementById(`watermarkOpacity_${watermark.id}`),
+        size: document.getElementById(`watermarkSize_${watermark.id}`),
+        position: document.getElementById(`watermarkPosition_${watermark.id}`),
+        rotation: document.getElementById(`watermarkRotation_${watermark.id}`),
+        effect: document.getElementById(`watermarkEffect_${watermark.id}`),
+        enablePattern: document.getElementById(`enablePattern_${watermark.id}`),
+        patternSpacing: document.getElementById(`patternSpacing_${watermark.id}`),
+        patternAngle: document.getElementById(`patternAngle_${watermark.id}`)
+    };
 
-    console.log('Applying watermark with settings:', {
-        text, font, color, opacity, size, position, rotation, effect, enablePattern, patternSpacing, patternAngle
-    });
+    // Check if all elements exist
+    for (const [key, element] of Object.entries(elements)) {
+        if (!element) {
+            console.error(`Element not found: ${key}_${watermark.id}`);
+            return; // Exit the function if any element is missing
+        }
+    }
+
+    const settings = {
+        text: elements.text.value,
+        font: elements.font.value,
+        color: elements.color.value,
+        opacity: parseFloat(elements.opacity.value),
+        size: parseInt(elements.size.value),
+        position: elements.position.value,
+        rotation: parseInt(elements.rotation.value),
+        effect: elements.effect.value,
+        enablePattern: elements.enablePattern.checked,
+        patternSpacing: parseInt(elements.patternSpacing.value),
+        patternAngle: parseInt(elements.patternAngle.value)
+    };
+
+    console.log('Applying watermark with settings:', settings);
+
+    if (!settings.text) {
+        console.warn('No watermark text provided');
+        return;
+    }
 
     ctx.save();
-    ctx.globalAlpha = opacity;
-    ctx.fillStyle = color;
-    ctx.font = `${size}px ${font}`;
+    ctx.globalAlpha = settings.opacity;
+    ctx.fillStyle = settings.color;
+    ctx.font = `${settings.size}px ${settings.font}`;
 
-    const metrics = ctx.measureText(text);
+    const metrics = ctx.measureText(settings.text);
     const textWidth = metrics.width;
-    const textHeight = parseInt(size, 10);
+    const textHeight = parseInt(settings.size, 10);
 
     let x, y;
-    if (position === 'custom') {
-        x = parseInt(document.getElementById(`watermarkX_${watermark.id}`).value);
-        y = parseInt(document.getElementById(`watermarkY_${watermark.id}`).value);
+    if (settings.position === 'custom') {
+        x = parseInt(document.getElementById(`watermarkX_${watermark.id}`).value || 0);
+        y = parseInt(document.getElementById(`watermarkY_${watermark.id}`).value || 0);
     } else {
-        switch (position) {
+        switch (settings.position) {
             case 'topLeft':
                 x = 10;
                 y = textHeight + 10;
@@ -67,23 +103,27 @@ function applyWatermarkFromSettings(watermark) {
                 x = (canvas.width - textWidth) / 2;
                 y = (canvas.height + textHeight) / 2;
                 break;
+            default:
+                console.warn('Invalid position, defaulting to top left');
+                x = 10;
+                y = textHeight + 10;
         }
     }
 
     console.log('Watermark position:', { x, y });
 
-    if (enablePattern) {
-        for (let i = -canvas.width; i < canvas.width * 2; i += patternSpacing) {
-            for (let j = -canvas.height; j < canvas.height * 2; j += patternSpacing) {
+    if (settings.enablePattern) {
+        for (let i = -canvas.width; i < canvas.width * 2; i += settings.patternSpacing) {
+            for (let j = -canvas.height; j < canvas.height * 2; j += settings.patternSpacing) {
                 ctx.save();
                 ctx.translate(i, j);
-                ctx.rotate(patternAngle * Math.PI / 180);
-                applyWatermark(text, 0, 0, rotation, effect);
+                ctx.rotate(settings.patternAngle * Math.PI / 180);
+                applyWatermark(settings.text, 0, 0, settings.rotation, settings.effect);
                 ctx.restore();
             }
         }
     } else {
-        applyWatermark(text, x, y, rotation, effect);
+        applyWatermark(settings.text, x, y, settings.rotation, settings.effect);
     }
 
     ctx.restore();

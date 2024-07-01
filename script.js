@@ -23,13 +23,15 @@ function applyWatermarkFromSettings(watermark) {
         effect: document.getElementById(`watermarkEffect_${watermark.id}`).value,
         enablePattern: document.getElementById(`enablePattern_${watermark.id}`).checked,
         patternSpacing: parseInt(document.getElementById(`patternSpacing_${watermark.id}`).value),
-        patternAngle: parseInt(document.getElementById(`patternAngle_${watermark.id}`).value)
+        patternAngle: parseInt(document.getElementById(`patternAngle_${watermark.id}`).value),
+        blendMode: document.getElementById(`watermarkBlendMode_${watermark.id}`).value
     };
 
     ctx.save();
     ctx.globalAlpha = settings.opacity;
     ctx.fillStyle = settings.color;
     ctx.font = `${settings.size}px ${settings.font}`;
+    ctx.globalCompositeOperation = settings.blendMode;
 
     const metrics = ctx.measureText(settings.text);
     const textWidth = metrics.width;
@@ -137,17 +139,37 @@ function createWatermarkControl(watermarkId) {
     const div = document.createElement('div');
     div.className = 'bg-gray-100 p-4 rounded-lg mb-4';
     div.innerHTML = `
-        <input type="text" id="watermarkText_${watermarkId}" placeholder="Watermark text" class="w-full border rounded p-2 mb-2">
+        <label for="watermarkText_${watermarkId}" class="block mb-1">Watermark Text:</label>
+        <input type="text" id="watermarkText_${watermarkId}" placeholder="Enter watermark text" class="w-full border rounded p-2 mb-2">
+        
+        <label for="watermarkFont_${watermarkId}" class="block mb-1">Font:</label>
         <select id="watermarkFont_${watermarkId}" class="w-full border rounded p-2 mb-2">
             <option value="Arial">Arial</option>
             <option value="Verdana">Verdana</option>
             <option value="Times New Roman">Times New Roman</option>
             <option value="Courier">Courier</option>
             <option value="Georgia">Georgia</option>
+            <option value="Palatino">Palatino</option>
+            <option value="Garamond">Garamond</option>
+            <option value="Bookman">Bookman</option>
+            <option value="Comic Sans MS">Comic Sans MS</option>
+            <option value="Trebuchet MS">Trebuchet MS</option>
+            <option value="Arial Black">Arial Black</option>
         </select>
+        
+        <label for="watermarkColor_${watermarkId}" class="block mb-1">Color:</label>
         <input type="color" id="watermarkColor_${watermarkId}" class="w-full h-10 mb-2">
-        <input type="range" id="watermarkOpacity_${watermarkId}" min="0" max="1" step="0.1" value="0.5" class="w-full mb-2">
-        <input type="range" id="watermarkSize_${watermarkId}" min="10" max="100" value="48" class="w-full mb-2">
+        
+        <label for="watermarkOpacity_${watermarkId}" class="block mb-1">Opacity:</label>
+        <div class="flex items-center space-x-2">
+            <input type="range" id="watermarkOpacity_${watermarkId}" min="0" max="1" step="0.01" value="0.5" class="w-full mb-2">
+            <input type="number" id="watermarkOpacityNumber_${watermarkId}" min="0" max="100" value="50" class="w-20 border rounded p-1 mb-2">
+        </div>
+        
+        <label for="watermarkSize_${watermarkId}" class="block mb-1">Size:</label>
+        <input type="range" id="watermarkSize_${watermarkId}" min="10" max="200" value="48" class="w-full mb-2">
+        
+        <label for="watermarkPosition_${watermarkId}" class="block mb-1">Position:</label>
         <select id="watermarkPosition_${watermarkId}" class="w-full border rounded p-2 mb-2">
             <option value="topLeft">Top Left</option>
             <option value="topRight">Top Right</option>
@@ -156,11 +178,19 @@ function createWatermarkControl(watermarkId) {
             <option value="center">Center</option>
             <option value="custom">Custom</option>
         </select>
+        
         <div id="customPosition_${watermarkId}" style="display:none;">
+            <label for="watermarkX_${watermarkId}" class="block mb-1">X Position:</label>
             <input type="number" id="watermarkX_${watermarkId}" placeholder="X" class="w-1/2 border rounded p-2 mb-2">
+            
+            <label for="watermarkY_${watermarkId}" class="block mb-1">Y Position:</label>
             <input type="number" id="watermarkY_${watermarkId}" placeholder="Y" class="w-1/2 border rounded p-2 mb-2">
         </div>
+        
+        <label for="watermarkRotation_${watermarkId}" class="block mb-1">Rotation:</label>
         <input type="range" id="watermarkRotation_${watermarkId}" min="0" max="360" value="0" class="w-full mb-2">
+        
+        <label for="watermarkEffect_${watermarkId}" class="block mb-1">Effect:</label>
         <select id="watermarkEffect_${watermarkId}" class="w-full border rounded p-2 mb-2">
             <option value="none">None</option>
             <option value="outline">Outline</option>
@@ -168,13 +198,29 @@ function createWatermarkControl(watermarkId) {
             <option value="emboss">Emboss</option>
             <option value="neon">Neon</option>
         </select>
-        <label>
+        
+        <label class="block mb-1">
             <input type="checkbox" id="enablePattern_${watermarkId}"> Enable Pattern
         </label>
+        
         <div id="patternOptions_${watermarkId}" style="display:none;">
+            <label for="patternSpacing_${watermarkId}" class="block mb-1">Pattern Spacing:</label>
             <input type="range" id="patternSpacing_${watermarkId}" min="50" max="300" value="100" class="w-full mb-2">
+            
+            <label for="patternAngle_${watermarkId}" class="block mb-1">Pattern Angle:</label>
             <input type="range" id="patternAngle_${watermarkId}" min="0" max="360" value="0" class="w-full mb-2">
         </div>
+        
+        <label for="watermarkBlendMode_${watermarkId}" class="block mb-1">Blend Mode:</label>
+        <select id="watermarkBlendMode_${watermarkId}" class="w-full border rounded p-2 mb-2">
+            <option value="normal">Normal</option>
+            <option value="multiply">Multiply</option>
+            <option value="screen">Screen</option>
+            <option value="overlay">Overlay</option>
+            <option value="darken">Darken</option>
+            <option value="lighten">Lighten</option>
+        </select>
+        
         <button class="removeWatermark bg-red-500 text-white px-4 py-2 rounded mt-2">Remove Watermark</button>
     `;
 
@@ -183,6 +229,17 @@ function createWatermarkControl(watermarkId) {
             updatePreview();
             saveWatermarksToLocalStorage();
         });
+    });
+
+    const opacitySlider = div.querySelector(`#watermarkOpacity_${watermarkId}`);
+    const opacityNumber = div.querySelector(`#watermarkOpacityNumber_${watermarkId}`);
+
+    opacitySlider.addEventListener('input', () => {
+        opacityNumber.value = Math.round(opacitySlider.value * 100);
+    });
+
+    opacityNumber.addEventListener('input', () => {
+        opacitySlider.value = opacityNumber.value / 100;
     });
 
     const positionSelect = div.querySelector(`#watermarkPosition_${watermarkId}`);
@@ -236,7 +293,8 @@ function saveWatermarkSettings(watermarkId) {
         effect: document.getElementById(`watermarkEffect_${watermarkId}`).value,
         enablePattern: document.getElementById(`enablePattern_${watermarkId}`).checked,
         patternSpacing: document.getElementById(`patternSpacing_${watermarkId}`).value,
-        patternAngle: document.getElementById(`patternAngle_${watermarkId}`).value
+        patternAngle: document.getElementById(`patternAngle_${watermarkId}`).value,
+        blendMode: document.getElementById(`watermarkBlendMode_${watermarkId}`).value
     };
 
     if (settings.position === 'custom') {
@@ -294,6 +352,7 @@ function applyWatermarkSetting(setting) {
     document.getElementById(`watermarkFont_${watermarkId}`).value = setting.font;
     document.getElementById(`watermarkColor_${watermarkId}`).value = setting.color;
     document.getElementById(`watermarkOpacity_${watermarkId}`).value = setting.opacity;
+    document.getElementById(`watermarkOpacityNumber_${watermarkId}`).value = Math.round(setting.opacity * 100);
     document.getElementById(`watermarkSize_${watermarkId}`).value = setting.size;
     document.getElementById(`watermarkPosition_${watermarkId}`).value = setting.position;
     document.getElementById(`watermarkRotation_${watermarkId}`).value = setting.rotation;
@@ -301,6 +360,7 @@ function applyWatermarkSetting(setting) {
     document.getElementById(`enablePattern_${watermarkId}`).checked = setting.enablePattern;
     document.getElementById(`patternSpacing_${watermarkId}`).value = setting.patternSpacing;
     document.getElementById(`patternAngle_${watermarkId}`).value = setting.patternAngle;
+    document.getElementById(`watermarkBlendMode_${watermarkId}`).value = setting.blendMode;
 
     if (setting.position === 'custom') {
         document.getElementById(`watermarkX_${watermarkId}`).value = setting.customX;
@@ -337,7 +397,7 @@ function saveImage() {
     container.appendChild(watermarkedImage);
     library.appendChild(container);
 
-    attachImageContainerListeners(); // Attach listeners after adding new images
+    attachImageContainerListeners();
     saveImageLibraryToLocalStorage();
 }
 
@@ -363,7 +423,6 @@ function attachImageContainerListeners() {
 }
 
 function openModal(originalSrc, watermarkedSrc) {
-    console.log('Opening modal with:', { originalSrc, watermarkedSrc });
     const modal = document.getElementById('imageModal');
     const modalImage = document.getElementById('modalImage');
     const toggleButton = document.getElementById('toggleImage');
@@ -377,13 +436,14 @@ function openModal(originalSrc, watermarkedSrc) {
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');
-    console.log('Modal classes:', modal.className);
+    document.body.classList.add('overflow-hidden');
 }
 
 function closeModal() {
     const modal = document.getElementById('imageModal');
     modal.classList.remove('flex');
     modal.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
 }
 
 document.getElementById('saveImage').addEventListener('click', saveImage);
@@ -430,9 +490,8 @@ document.getElementById('imageModal').addEventListener('click', (e) => {
 function init() {
     updateSavedSettingsBox();
     loadImageLibraryFromLocalStorage();
-    attachImageContainerListeners(); // Ensure listeners are attached on init
+    attachImageContainerListeners();
     
-    // Load existing watermarks
     watermarks.forEach(watermark => {
         const watermarkControl = createWatermarkControl(watermark.id);
         document.getElementById('watermarkControls').appendChild(watermarkControl);

@@ -28,6 +28,10 @@ function applyWatermarkFromSettings(watermark) {
     const patternSpacing = parseInt(document.getElementById(`patternSpacing_${watermark.id}`).value);
     const patternAngle = parseInt(document.getElementById(`patternAngle_${watermark.id}`).value);
 
+    console.log('Applying watermark with settings:', {
+        text, font, color, opacity, size, position, rotation, effect, enablePattern, patternSpacing, patternAngle
+    });
+
     ctx.save();
     ctx.globalAlpha = opacity;
     ctx.fillStyle = color;
@@ -66,6 +70,8 @@ function applyWatermarkFromSettings(watermark) {
         }
     }
 
+    console.log('Watermark position:', { x, y });
+
     if (enablePattern) {
         for (let i = -canvas.width; i < canvas.width * 2; i += patternSpacing) {
             for (let j = -canvas.height; j < canvas.height * 2; j += patternSpacing) {
@@ -81,6 +87,7 @@ function applyWatermarkFromSettings(watermark) {
     }
 
     ctx.restore();
+    console.log('Watermark applied');
 }
 
 function applyWatermark(text, x, y, rotation, effect) {

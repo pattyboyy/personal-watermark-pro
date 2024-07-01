@@ -447,11 +447,11 @@ function openModal(originalSrc, watermarkedSrc) {
     const modal = document.getElementById('imageModal');
     const modalImage = document.getElementById('modalImage');
     const toggleButton = document.getElementById('toggleImage');
-    
+
     modalImage.src = watermarkedSrc;
     modalImage.dataset.originalSrc = originalSrc;
     modalImage.dataset.watermarkedSrc = watermarkedSrc;
-    
+
     toggleButton.textContent = 'Show Original';
     toggleButton.dataset.showingWatermarked = 'true';
 

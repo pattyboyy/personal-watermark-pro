@@ -3,12 +3,21 @@ const ctx = canvas.getContext('2d');
 let currentImage = null;
 let watermarks = JSON.parse(localStorage.getItem('watermarks')) || [];
 let savedSettings = JSON.parse(localStorage.getItem('savedSettings')) || [];
+let cropStartX, cropStartY, cropEndX, cropEndY;
+let isCropping = false;
 
 function updatePreview() {
     if (!currentImage) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
     watermarks.forEach(applyWatermarkFromSettings);
+}
+
+function updateDimensionInputs() {
+    if (currentImage) {
+        document.getElementById('resizeWidth').value = canvas.width;
+        document.getElementById('resizeHeight').value = canvas.height;
+    }
 }
 
 function applyWatermarkFromSettings(watermark) {
@@ -119,6 +128,7 @@ document.getElementById('imageUpload').addEventListener('change', (e) => {
             canvas.width = currentImage.width;
             canvas.height = currentImage.height;
             updatePreview();
+            updateDimensionInputs();
         };
         currentImage.src = event.target.result;
     };
@@ -446,6 +456,97 @@ function closeModal() {
     document.body.classList.remove('overflow-hidden');
 }
 
+function resizeImage() {
+    if (!currentImage) return;
+
+    const newWidth = parseInt(document.getElementById('resizeWidth').value);
+    const newHeight = parseInt(document.getElementById('resizeHeight').value);
+
+    if (isNaN(newWidth) || isNaN(newHeight) || newWidth <= 0 || newHeight <= 0) {
+        alert('Please enter valid dimensions for resizing.');
+        return;
+    }
+
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCanvas.width = newWidth;
+    tempCanvas.height = newHeight;
+
+    tempCtx.drawImage(currentImage, 0, 0, newWidth, newHeight);
+
+    const resizedImage = new Image();
+    resizedImage.onload = function() {
+        currentImage = resizedImage;
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+        updatePreview();
+        updateDimensionInputs();
+    };
+    resizedImage.src = tempCanvas.toDataURL();
+}
+
+function startCropping() {
+    isCropping = true;
+    document.getElementById('cropOverlay').style.display = 'block';
+}
+
+function stopCropping() {
+    isCropping = false;
+    document.getElementById('cropOverlay').style.display = 'none';
+}
+
+function updateCropOverlay(e) {
+    if (!isCropping) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    cropEndX = (e.clientX - rect.left) * scaleX;
+    cropEndY = (e.clientY - rect.top) * scaleY;
+
+    const overlay = document.getElementById('cropOverlay');
+    overlay.style.left = `${Math.min(cropStartX, cropEndX) / scaleX}px`;
+    overlay.style.top = `${Math.min(cropStartY, cropEndY) / scaleY}px`;
+    overlay.style.width = `${Math.abs(cropEndX - cropStartX) / scaleX}px`;
+    overlay.style.height = `${Math.abs(cropEndY - cropStartY) / scaleY}px`;
+}
+
+function cropImage() {
+    if (!currentImage) return;
+
+    const cropWidth = Math.abs(cropEndX - cropStartX);
+    const cropHeight = Math.abs(cropEndY - cropStartY);
+
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCanvas.width = cropWidth;
+    tempCanvas.height = cropHeight;
+
+    tempCtx.drawImage(
+        currentImage,
+        Math.min(cropStartX, cropEndX),
+        Math.min(cropStartY, cropEndY),
+        cropWidth,
+        cropHeight,
+        0,
+        0,
+        cropWidth,
+        cropHeight
+    );
+
+    const croppedImage = new Image();
+    croppedImage.onload = function() {
+        currentImage = croppedImage;
+        canvas.width = cropWidth;
+        canvas.height = cropHeight;
+        updatePreview();
+        updateDimensionInputs();
+        stopCropping();
+    };
+    croppedImage.src = tempCanvas.toDataURL();
+}
+
 document.getElementById('saveImage').addEventListener('click', saveImage);
 
 document.getElementById('downloadImage').addEventListener('click', () => {
@@ -487,6 +588,26 @@ document.getElementById('imageModal').addEventListener('click', (e) => {
     }
 });
 
+document.getElementById('resizeImage').addEventListener('click', resizeImage);
+document.getElementById('cropImage').addEventListener('click', startCropping);
+
+canvas.addEventListener('mousedown', (e) => {
+    if (!isCropping) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    cropStartX = (e.clientX - rect.left) * scaleX;
+    cropStartY = (e.clientY - rect.top) * scaleY;
+});
+
+canvas.addEventListener('mousemove', updateCropOverlay);
+
+canvas.addEventListener('mouseup', () => {
+    if (isCropping) {
+        cropImage();
+    }
+});
+
 function init() {
     updateSavedSettingsBox();
     loadImageLibraryFromLocalStorage();
@@ -498,6 +619,7 @@ function init() {
     });
     
     updatePreview();
+    updateDimensionInputs();
 }
 
 init();

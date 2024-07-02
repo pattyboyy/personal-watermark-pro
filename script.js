@@ -3,8 +3,8 @@ const ctx = canvas.getContext('2d');
 let currentImage = null;
 let watermarks = JSON.parse(localStorage.getItem('watermarks')) || [];
 let savedSettings = JSON.parse(localStorage.getItem('savedSettings')) || [];
-let cropStartX, cropStartY, cropEndX, cropEndY;
 let isCropping = false;
+let cropStartX, cropStartY, cropEndX, cropEndY;
 
 function updatePreview() {
     if (!currentImage) return;
@@ -487,12 +487,19 @@ function resizeImage() {
 
 function startCropping() {
     isCropping = true;
-    document.getElementById('cropOverlay').style.display = 'block';
+    cropStartX = cropStartY = cropEndX = cropEndY = undefined;
+    const overlay = document.getElementById('cropOverlay');
+    overlay.style.display = 'block';
+    overlay.style.left = overlay.style.top = overlay.style.width = overlay.style.height = '0px';
+    canvas.style.cursor = 'crosshair';
 }
 
 function stopCropping() {
     isCropping = false;
-    document.getElementById('cropOverlay').style.display = 'none';
+    const overlay = document.getElementById('cropOverlay');
+    overlay.style.display = 'none';
+    canvas.style.cursor = 'default';
+    cropStartX = cropStartY = cropEndX = cropEndY = undefined;
 }
 
 function updateCropOverlay(e) {
@@ -513,10 +520,15 @@ function updateCropOverlay(e) {
 }
 
 function cropImage() {
-    if (!currentImage) return;
+    if (!currentImage || cropStartX === undefined || cropEndX === undefined) return;
 
     const cropWidth = Math.abs(cropEndX - cropStartX);
     const cropHeight = Math.abs(cropEndY - cropStartY);
+
+    if (cropWidth === 0 || cropHeight === 0) {
+        alert("Please select an area to crop.");
+        return;
+    }
 
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d');
@@ -589,7 +601,14 @@ document.getElementById('imageModal').addEventListener('click', (e) => {
 });
 
 document.getElementById('resizeImage').addEventListener('click', resizeImage);
-document.getElementById('cropImage').addEventListener('click', startCropping);
+
+document.getElementById('cropImage').addEventListener('click', () => {
+    if (isCropping) {
+        cropImage();
+    } else {
+        startCropping();
+    }
+});
 
 canvas.addEventListener('mousedown', (e) => {
     if (!isCropping) return;
@@ -608,6 +627,12 @@ canvas.addEventListener('mouseup', () => {
     }
 });
 
+canvas.addEventListener('mouseleave', () => {
+    if (isCropping) {
+        stopCropping();
+    }
+});
+
 function init() {
     updateSavedSettingsBox();
     loadImageLibraryFromLocalStorage();
@@ -620,6 +645,7 @@ function init() {
     
     updatePreview();
     updateDimensionInputs();
+    stopCropping(); // Ensure cropping is stopped on initialization
 }
 
 init();

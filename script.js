@@ -412,16 +412,37 @@ function saveImage() {
 }
 
 function saveImageLibraryToLocalStorage() {
-    const library = document.getElementById('imageLibrary').innerHTML;
-    localStorage.setItem('imageLibrary', library);
+    const library = Array.from(document.querySelectorAll('#imageLibrary .image-container')).map(container => {
+        const originalImageSrc = container.querySelector('.original-image').src;
+        const watermarkedImageSrc = container.querySelector('.watermarked-image').src;
+        return { originalImageSrc, watermarkedImageSrc };
+    });
+    localStorage.setItem('imageLibrary', JSON.stringify(library));
 }
 
 function loadImageLibraryFromLocalStorage() {
-    const library = localStorage.getItem('imageLibrary');
-    if (library) {
-        document.getElementById('imageLibrary').innerHTML = library;
-        attachImageContainerListeners();
-    }
+    const library = JSON.parse(localStorage.getItem('imageLibrary')) || [];
+    const imageLibraryElement = document.getElementById('imageLibrary');
+    imageLibraryElement.innerHTML = '';
+    library.forEach(item => {
+        const container = document.createElement('div');
+        container.className = 'image-container border p-2 rounded bg-gray-100 flex flex-col items-center cursor-pointer';
+
+        const originalImage = new Image();
+        originalImage.src = item.originalImageSrc;
+        originalImage.className = 'original-image w-full h-auto mb-2';
+        originalImage.style.maxWidth = '200px';
+
+        const watermarkedImage = new Image();
+        watermarkedImage.src = item.watermarkedImageSrc;
+        watermarkedImage.className = 'watermarked-image w-full h-auto';
+        watermarkedImage.style.maxWidth = '200px';
+
+        container.appendChild(originalImage);
+        container.appendChild(watermarkedImage);
+        imageLibraryElement.appendChild(container);
+    });
+    attachImageContainerListeners();
 }
 
 function attachImageContainerListeners() {
@@ -649,3 +670,4 @@ function init() {
 }
 
 init();
+
